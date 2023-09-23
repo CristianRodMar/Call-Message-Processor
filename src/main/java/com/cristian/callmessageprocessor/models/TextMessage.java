@@ -11,10 +11,10 @@ public class TextMessage {
     private long timestamp;
 
     @Schema(description = "Mobile identifier of the origin mobile (MSISDN)")
-    private long origin;
+    private String origin;
 
     @Schema(description = "Mobile identifier of the destination mobile (MSISDN)")
-    private long destination;
+    private String destination;
 
     @Schema(description = "Content of the message")
     private String message_content;

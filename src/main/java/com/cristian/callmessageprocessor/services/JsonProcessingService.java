@@ -38,7 +38,8 @@ public class JsonProcessingService {
         //Split the JSON content into individual lines
         String[] jsonLines = jsonContent.split("\n");
         log.info("Total registers readed: {}", jsonLines.length);
-        //Loop through each line of JSON
+        int invalidCount = 0;
+        //Loop through each line of JSON   
         for (int i = 0; i < jsonLines.length; i++) {
 
             boolean isValid = true;
@@ -53,7 +54,7 @@ public class JsonProcessingService {
                         CallMessage callMessage = objectMapper.convertValue(node, CallMessage.class);
                         //Check if the CallMessage is valid
                         if (!MessageValidators.isCallMessageValid(callMessage)) {
-                            throw new IllegalArgumentException("ROW NUMBER " + (i + 1) + " -> Invalid CALL message");
+                            throw new IllegalArgumentException();
                         }
                         //Add the valid CallMessage to the list
                         callMessages.add(callMessage);
@@ -63,7 +64,7 @@ public class JsonProcessingService {
                         TextMessage textMessage = objectMapper.convertValue(node, TextMessage.class);
                         //Check if the TextMessage is valid
                         if (!MessageValidators.isTextMessageValid(textMessage)) {
-                            throw new IllegalArgumentException("ROW NUMBER " + (i + 1) + " -> Invalid TEXT message");
+                            throw new IllegalArgumentException();
                         }
                         //Add the valid TextMessage to the list
                         textMessages.add(textMessage);
@@ -76,13 +77,15 @@ public class JsonProcessingService {
             }
             // If the message is not valid, convert it to a Map and add it to the invalidMessages list
             if (!isValid) {
+                log.error("ROW NUMBER " + (i + 1) + " -> Invalid message");
+                invalidCount++;
                 TypeReference<Map<String, Object>> typeRef = new TypeReference<Map<String, Object>>() {};
                 //Convert the JsonNode into a Map
                 Map<String, Object> invalidMessage = objectMapper.convertValue(node, typeRef);
                 invalidMessages.add(invalidMessage);
             }
         }
-
+        if (invalidCount > 0) log.error(invalidCount + " messages are invalid");
         // Set the lists of valid and invalid messages in the MessageLog
         messageLog.setCallMessages(callMessages);
         messageLog.setTextMessages(textMessages);
