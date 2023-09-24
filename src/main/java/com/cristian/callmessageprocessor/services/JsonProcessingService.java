@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.cristian.callmessageprocessor.models.CallMessage;
-import com.cristian.callmessageprocessor.models.MessageLog;
-import com.cristian.callmessageprocessor.models.TextMessage;
+import com.cristian.callmessageprocessor.models.CallRecord;
+import com.cristian.callmessageprocessor.models.Records;
+import com.cristian.callmessageprocessor.models.TextRecord;
 import com.cristian.callmessageprocessor.utils.MessageValidators;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,15 +25,15 @@ public class JsonProcessingService {
 
     private final ObjectMapper objectMapper;
 
-    public MessageLog processJson(String jsonContent) throws IOException {
+    public Records processJson(String jsonContent) throws IOException {
 
-        //Create a new MessageLog instance to store procesed messages
-        MessageLog messageLog = new MessageLog();
+        //Create a new Records instance to store procesed messages
+        Records messageLog = new Records();
 
         //Lists to store valid Call, Text and invalid messages
-        List<CallMessage> callMessages = new ArrayList<>();
-        List<TextMessage> textMessages = new ArrayList<>();
-        List<Map<String, Object>> invalidMessages = new ArrayList<>();
+        List<CallRecord> callRecords = new ArrayList<>();
+        List<TextRecord> textRecords = new ArrayList<>();
+        List<Map<String, Object>> invalidRecords = new ArrayList<>();
         
         //Split the JSON content into individual lines
         String[] jsonLines = jsonContent.split("\n");
@@ -51,23 +51,23 @@ public class JsonProcessingService {
                 switch(messageType) {
                     case "CALL":
                         //Convert the JSON into a CallMessage object
-                        CallMessage callMessage = objectMapper.convertValue(node, CallMessage.class);
+                        CallRecord callMessage = objectMapper.convertValue(node, CallRecord.class);
                         //Check if the CallMessage is valid
                         if (!MessageValidators.isCallMessageValid(callMessage)) {
                             throw new IllegalArgumentException();
                         }
                         //Add the valid CallMessage to the list
-                        callMessages.add(callMessage);
+                        callRecords.add(callMessage);
                         break;
                     case "MSG":
                         //Convert the JSON into a TextMessage object
-                        TextMessage textMessage = objectMapper.convertValue(node, TextMessage.class);
+                        TextRecord textMessage = objectMapper.convertValue(node, TextRecord.class);
                         //Check if the TextMessage is valid
                         if (!MessageValidators.isTextMessageValid(textMessage)) {
                             throw new IllegalArgumentException();
                         }
                         //Add the valid TextMessage to the list
-                        textMessages.add(textMessage);
+                        textRecords.add(textMessage);
                         break;
                     default:
                         isValid = false;
@@ -82,14 +82,14 @@ public class JsonProcessingService {
                 TypeReference<Map<String, Object>> typeRef = new TypeReference<Map<String, Object>>() {};
                 //Convert the JsonNode into a Map
                 Map<String, Object> invalidMessage = objectMapper.convertValue(node, typeRef);
-                invalidMessages.add(invalidMessage);
+                invalidRecords.add(invalidMessage);
             }
         }
         if (invalidCount > 0) log.error(invalidCount + " messages are invalid");
-        // Set the lists of valid and invalid messages in the MessageLog
-        messageLog.setCallMessages(callMessages);
-        messageLog.setTextMessages(textMessages);
-        messageLog.setInvalidMessages(invalidMessages);
+        // Set the lists of valid and invalid messages in the MessagesRecord
+        messageLog.setCallRecords(callRecords);
+        messageLog.setTextRecords(textRecords);
+        messageLog.setInvalidRecords(invalidRecords);
 
         return messageLog;
     }

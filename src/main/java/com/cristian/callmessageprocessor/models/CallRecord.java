@@ -3,9 +3,10 @@ package com.cristian.callmessageprocessor.models;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+
 @Data
-@Schema(description = "Text type message")
-public class TextMessage {
+@Schema(description = "Call type message")
+public class CallRecord {
     
     @Schema(description = "The timestamp of the message")
     private long timestamp;
@@ -16,10 +17,13 @@ public class TextMessage {
     @Schema(description = "Mobile identifier of the destination mobile (MSISDN)")
     private String destination;
 
-    @Schema(description = "Content of the message")
-    private String message_content;
+    @Schema(description = "Call duration")
+    private int duration;
 
-    @Schema(description = "Status of the message. Two values are valid: {DELIVERED|SEEN}")
-    private TextStatusCode message_status;
-    
+    @Schema(description = "Status code of the call. Two values are valid: {OK|KO}")
+    private CallStatusCode status_code;
+
+    @Schema(description = "Status description of the call")
+    private String status_description;
+
 }

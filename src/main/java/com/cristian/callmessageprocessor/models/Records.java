@@ -7,16 +7,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "A complete log file based on a specific date")
-public class MessageLog {
+@Schema(description = "A complete record file based on a specific date")
+public class Records {
     
     @Schema(description = "List of all Call message types")
-    private List<CallMessage> callMessages;
+    private List<CallRecord> callRecords;
 
     @Schema(description = "List of all Text message types")
-    private List<TextMessage> textMessages;
+    private List<TextRecord> textRecords;
 
     @Schema(description = "List of all invalid messages")
-    private List<Map<String, Object>> invalidMessages;
+    private List<Map<String, Object>> invalidRecords;
 
 }
