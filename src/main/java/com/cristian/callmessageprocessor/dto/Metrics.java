@@ -1,5 +1,6 @@
 package com.cristian.callmessageprocessor.dto;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,12 @@ public class Metrics {
     private long fieldErrors;
     private List<CountryOriginDestination> callsByOriginDestination;
     private Map<String, Long> callStatuses;
-    private Map<String, Double> avgCallDurationByCountry;
+    private Map<String, Integer> avgCallDurationByCountry;
     private Map<String, Long> wordOccurrences;
     
+    public Metrics() {
+        callStatuses = new HashMap<>();
+        callStatuses.put("OK", 0L);
+        callStatuses.put("KO", 0L);
+    }
 }

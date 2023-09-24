@@ -2,6 +2,7 @@ package com.cristian.callmessageprocessor.controllers;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +28,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 
 @Tag(name = "API Controller", description = "API management controller")
 @RestController
 @RequestMapping("/")
-@Slf4j
 public class ApiController {
 
     //Maps to store metrics and kpis
@@ -58,19 +57,22 @@ public class ApiController {
         @ApiResponse(responseCode = "400", description = "The format date is not correct", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{date}")
-    public ResponseEntity<Object> processJsonForDate(@Parameter(description = "Search log by date format YYYYMMDD") @PathVariable String date) throws IOException {
+    public ResponseEntity<Object> processJsonForDate(@Parameter(description = "Search file by date format YYYYMMDD") @PathVariable String date) throws IOException {
         try {
             //Download and process the Json
             String jsonContent = downloadService.downloadJsonFile(date);
+
+            long startTime = System.currentTimeMillis();
             Records records = processingService.processJson(jsonContent);
+            long endTime = System.currentTimeMillis();
+
             //Calculate metrics and kpis for the actual date and store them in maps
             Metrics metrics = metricsAndKPIsService.calculateMetrics(records);
-            //KPIs kpis = metricsAndKPIsService.calculateKPIs(messageLog);
-            log.info("Total rows with missing fields: " + metrics.getMissingFields());
-            log.info("Total Text records with blank message: " + metrics.getBlankContent());
-            log.info("Total rows with field errors: " + metrics.getFieldErrors());
-            //metricsMap.put(date, metrics);
-            //kpisMap.put(date, kpis);
+            KPIs kpis = metricsAndKPIsService.calculateKPIs(records);
+            kpis.getProcessDurations().put(date, (endTime - startTime));         
+
+            metricsMap.put(date, metrics);
+            kpisMap.put(date, kpis);
 
             return ResponseEntity.ok(records);
         } catch (IllegalArgumentException e){
@@ -81,8 +83,34 @@ public class ApiController {
 
     }
 
-    //@GetMapping("/{date}/metrics") metrics for a json file, if not exists in memory, process it
+    @GetMapping("/{date}/metrics") //metrics for a json file, if not exists in memory, process it
+    public ResponseEntity<Object> getDateMetrics(@Parameter(description = "Search file by date format YYYYMMDD") @PathVariable String date) throws IOException {
+        try {
+            Metrics metrics = new Metrics();
+            //Check if the metrics of the file are already saved
+            if (metricsMap.containsKey(date)) {
+                metrics = metricsMap.get(date);
+                return ResponseEntity.ok(metrics);
+            } else {
+                //Download and calculate the file if not
+                String jsonContent = downloadService.downloadJsonFile(date);
+                long startTime = System.currentTimeMillis();
+                Records records = processingService.processJson(jsonContent);
+                long endTime = System.currentTimeMillis();
+                metrics = metricsAndKPIsService.calculateMetrics(records);
+                KPIs kpis = metricsAndKPIsService.calculateKPIs(records);
+                kpis.getProcessDurations().put(date, (endTime - startTime));
+                metricsMap.put(date, metrics);
+                kpisMap.put(date, kpis);
+                return ResponseEntity.ok(metrics);
+            }
 
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"code\": 400, \"message\": \"Invalid date format. Use YYYYMMDD\"}");
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"code\": 404, \"message\": \"JSON not found for date " + date + "\"}");
+        }
+    }
     //@GetMapping("/{date}/kpis") kpis for a json file, , if not exists in memory, process it
 
     //@GetMapping("/metrics") metrics for all procesed json files

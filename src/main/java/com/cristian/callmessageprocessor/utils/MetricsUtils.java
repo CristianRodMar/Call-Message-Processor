@@ -1,14 +1,12 @@
 package com.cristian.callmessageprocessor.utils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.cristian.callmessageprocessor.dto.CountryOriginDestination;
 import com.cristian.callmessageprocessor.models.CallRecord;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 public class MetricsUtils {
     
     public static boolean haveMissingFields(Map<String, Object> invalidRecord) {
@@ -250,18 +248,20 @@ public class MetricsUtils {
         String originCountry = MSISDNCC.getCountryFromMSISDN(callRecord.getOrigin());
         String destinationCountry = MSISDNCC.getCountryFromMSISDN(callRecord.getDestination());
 
-        //Check if the origin Country exists in the List
+        //Check if the origin Country exists in the List, add one if exists
         boolean originCountryExists = false;
         for (CountryOriginDestination country : callsBCountryOriginDestinations) {
             if (country.getCountry().equals(originCountry)) {
                 originCountryExists = true;
+                //Add one if already exists
+                country.setOriginCount(country.getOriginCount() + 1);
                 break;
             }
         }
 
         //Create it if not exists
         if (!originCountryExists) {
-            CountryOriginDestination newCountryFromOrigin = new CountryOriginDestination(originCountry, 0, 0);
+            CountryOriginDestination newCountryFromOrigin = new CountryOriginDestination(originCountry, 1, 0);
             callsBCountryOriginDestinations.add(newCountryFromOrigin);
         }
 
@@ -270,17 +270,56 @@ public class MetricsUtils {
         for (CountryOriginDestination country : callsBCountryOriginDestinations) {
             if (country.getCountry().equals(destinationCountry)) {
                 destinationCountryExistis = true;
+                country.setDestinationCount(country.getDestinationCount() + 1);
                 break;
             }
         }
 
         if (!destinationCountryExistis) {
-            CountryOriginDestination newCountryFromDestination = new CountryOriginDestination(destinationCountry, 0, 0);
+            CountryOriginDestination newCountryFromDestination = new CountryOriginDestination(destinationCountry, 0, 1);
             callsBCountryOriginDestinations.add(newCountryFromDestination);
         }
 
-
         return callsBCountryOriginDestinations;
     }
+
+    public static Map<String, Long> getCallStatuses(Map<String, Long> callStatuses, CallRecord callRecord) {
+        String callStatusCode = callRecord.getStatus_code().toString();
+
+        if (callStatusCode.equals("OK")) {
+            callStatuses.put("OK", callStatuses.get("OK") + 1);
+        } else {
+            callStatuses.put("KO", callStatuses.get("KO") + 1);
+        }
+
+        return callStatuses;
+    }
+
+    public static Map<String, Integer> getAvgCallDurationByCountry(List<CallRecord> callRecords) {
+        Map<String, Integer> avgCallDurationByCountry = new HashMap<>();
+
+        Map<String, Integer> durationPerCountry = new HashMap<>();
+        Map<String, Integer> callsAmountByCountry = new HashMap<>();
+
+        for (CallRecord callRecord : callRecords) {
+            //I am taking origin country as reference por duration
+            String originCountry = MSISDNCC.getCountryFromMSISDN(callRecord.getOrigin());
+
+            durationPerCountry.put(originCountry, durationPerCountry.getOrDefault(originCountry, 0) + callRecord.getDuration());
+            callsAmountByCountry.put(originCountry, callsAmountByCountry.getOrDefault(originCountry, 0) + 1);
+
+        }
+
+        for (String country : durationPerCountry.keySet()) {
+            int durationSum = durationPerCountry.get(country);
+            int amountCalls = callsAmountByCountry.get(country);
+
+            int avg = durationSum / amountCalls;
+            avgCallDurationByCountry.put(country, avg);
+        }
+
+        return avgCallDurationByCountry;
+    }
+
 }
 
