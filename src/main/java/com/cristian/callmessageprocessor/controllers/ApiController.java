@@ -52,11 +52,11 @@ public class ApiController {
     }
 
     @Operation(summary = "Retrieve a records of messages by date", 
-        description = "Get a Records object by specifying its date. The response is a JSON with two arrays with all CallMessages and TextMessages of the log")
+        description = "Get a Records object by specifying its date. The response is a JSON with two arrays with all CallMessages and TextMessages")
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation =  Records.class), mediaType = "application/json")}),
         @ApiResponse(responseCode = "404", description = "The log with the given date was not found", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "400", description = "The format date is not correct", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "400", description = "The date format is not correct", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{date}")
     public ResponseEntity<Object> processJsonForDate(@Parameter(description = "Search file by date format YYYYMMDD") @PathVariable String date) throws IOException {
@@ -90,7 +90,7 @@ public class ApiController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation =  Metrics.class), mediaType = "application/json")}),
         @ApiResponse(responseCode = "404", description = "The log with the given date was not found", content = {@Content(schema = @Schema())}),
-        @ApiResponse(responseCode = "400", description = "The format date is not correct", content = {@Content(schema = @Schema())})
+        @ApiResponse(responseCode = "400", description = "The date format is not correct", content = {@Content(schema = @Schema())})
     })
     @GetMapping("/{date}/metrics") //metrics for a json file, if not exists in memory, process it
     public ResponseEntity<Object> getDateMetrics(@Parameter(description = "Search file metrics by date format YYYYMMDD") @PathVariable String date) throws IOException {
