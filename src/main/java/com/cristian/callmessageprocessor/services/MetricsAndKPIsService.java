@@ -73,8 +73,7 @@ public class MetricsAndKPIsService {
                 }   
             }
         }
-
-        metrics.setWordOccurrences(wordFrequencyMap);
+        metrics.setWordOccurrences(MetricsUtils.sortMapWordOccurrences(wordFrequencyMap));
         return metrics;
     }
 
@@ -85,12 +84,11 @@ public class MetricsAndKPIsService {
         kpis.setTotalRows(records.getCallRecords().size() + records.getTextRecords().size() + records.getInvalidRecords().size());
         kpis.setTotalCalls(records.getCallRecords().size());
         kpis.setTotalMessages(records.getTextRecords().size());
-        kpis.setDistinctOriginCountryCodes(KPIsUtils.getDistinctCodesNumber(records, true));
-        kpis.setDistinctDestinationCountryCodes(KPIsUtils.getDistinctCodesNumber(records, false));
+        kpis.setDistinctOriginCountryCodes(KPIsUtils.getDistinctCodesNumber(records, true).size());
+        kpis.setDistinctDestinationCountryCodes(KPIsUtils.getDistinctCodesNumber(records, false).size());
+        kpis.setUniqueCountryCodesOrigin(KPIsUtils.getDistinctCodesNumber(records, true));
+        kpis.setUniqueCountryCodesDestination(KPIsUtils.getDistinctCodesNumber(records, false));
         return kpis;
     }
-
-    
-    
-    
+ 
 }

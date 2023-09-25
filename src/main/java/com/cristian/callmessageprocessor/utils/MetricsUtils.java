@@ -1,10 +1,15 @@
 package com.cristian.callmessageprocessor.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.cristian.callmessageprocessor.dto.CountryOriginDestination;
+import com.cristian.callmessageprocessor.dto.Metrics;
 import com.cristian.callmessageprocessor.models.CallRecord;
 
 public class MetricsUtils {
@@ -321,5 +326,92 @@ public class MetricsUtils {
         return avgCallDurationByCountry;
     }
 
+    public static Metrics getAllMetrics(Map<String, Metrics> metricsMap) {
+        Metrics totalMetrics = new Metrics();
+        Map<String, Integer> countryOccurrences = new HashMap<>();
+        for (Entry<String, Metrics> entry : metricsMap.entrySet()) {
+            Metrics metrics = entry.getValue();
+
+            totalMetrics.setMissingFields(totalMetrics.getMissingFields() + metrics.getMissingFields());
+            totalMetrics.setBlankContent(totalMetrics.getBlankContent() + metrics.getBlankContent());
+            totalMetrics.setFieldErrors(totalMetrics.getFieldErrors() + metrics.getFieldErrors());
+
+            for (CountryOriginDestination country : metrics.getCallsByOriginDestination()) {
+                boolean exists = false;
+                for (CountryOriginDestination totalCountry : totalMetrics.getCallsByOriginDestination()) {
+                    if (totalCountry.getCountry().equals(country.getCountry())) {
+                        exists = true;
+                        totalCountry.setDestinationCount(totalCountry.getDestinationCount() + country.getDestinationCount());
+                        totalCountry.setOriginCount(totalCountry.getOriginCount() + country.getOriginCount());
+                    }
+                }
+
+                if (!exists) {
+                    totalMetrics.getCallsByOriginDestination().add(new CountryOriginDestination(country));
+                }
+            }
+
+            for (Entry<String, Long> status : metrics.getCallStatuses().entrySet()) {
+                for (Entry<String, Long> totalStatus : totalMetrics.getCallStatuses().entrySet()) {
+                    if (status.getKey().equals(totalStatus.getKey())) {
+                        totalStatus.setValue(totalStatus.getValue() + status.getValue());
+                    }
+                }
+            }
+
+            
+
+            //Sum all avgs
+            for (Entry<String, Integer> avgDuration : metrics.getAvgCallDurationByCountry().entrySet()) {
+                boolean exists = false;
+                for (Entry<String, Integer> totalAvg : totalMetrics.getAvgCallDurationByCountry().entrySet()) {
+                    if (avgDuration.getKey().equals(totalAvg.getKey())) {
+                        exists = true;
+                        countryOccurrences.put(avgDuration.getKey(), countryOccurrences.get(avgDuration.getKey()) + 1);
+                        totalAvg.setValue(totalAvg.getValue() + avgDuration.getValue());
+                    }
+                }
+
+                if (!exists) {
+                    countryOccurrences.put(avgDuration.getKey(), 1);
+                    totalMetrics.getAvgCallDurationByCountry().put(avgDuration.getKey(), avgDuration.getValue());
+                }
+            }
+        
+            //Get the avg
+            for (Entry<String, Integer> avgDuration : totalMetrics.getAvgCallDurationByCountry().entrySet()) {
+                if (countryOccurrences.containsKey(avgDuration.getKey())) {
+                    avgDuration.setValue(avgDuration.getValue() / countryOccurrences.get(avgDuration.getKey()));
+                }
+            }
+
+            for (Entry<String, Long> word : metrics.getWordOccurrences().entrySet()) {
+                boolean exists = false;
+                for (Entry<String, Long> totalWord : totalMetrics.getWordOccurrences().entrySet()) {
+                    if (word.getKey().equals(totalWord.getKey())) {
+                        exists = true;
+                        totalWord.setValue(totalWord.getValue() + word.getValue());
+                    }
+                }
+
+                if (!exists) {
+                    totalMetrics.getWordOccurrences().put(word.getKey(), word.getValue());
+                }
+            }
+
+            totalMetrics.setWordOccurrences(sortMapWordOccurrences(totalMetrics.getWordOccurrences()));
+
+        }
+        return totalMetrics;
+    }
+
+    public static Map<String, Long> sortMapWordOccurrences(Map<String, Long> wordOccurrences) {
+        List<Map.Entry<String, Long>> listToOrder = new ArrayList<>(wordOccurrences.entrySet());
+        listToOrder.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
+        Map<String, Long> sortedMap = listToOrder.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                                    (e1, e2) -> e2, LinkedHashMap::new));
+        return sortedMap;
+    }
+    
 }
 

@@ -1,5 +1,6 @@
 package com.cristian.callmessageprocessor.dto;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,9 @@ public class Metrics {
     
     public Metrics() {
         callStatuses = new HashMap<>();
+        avgCallDurationByCountry = new HashMap<>();
+        callsByOriginDestination = new ArrayList<CountryOriginDestination>();
+        wordOccurrences = new HashMap<>();
         callStatuses.put("OK", 0L);
         callStatuses.put("KO", 0L);
     }
