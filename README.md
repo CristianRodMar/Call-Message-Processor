@@ -14,6 +14,7 @@ Además, he aprovechado esta oportunidad para experimentar con tecnologías nuev
 - Swagger: Herramienta para documentar y exponer APIs de manera sencilla.
 - Lombok: Biblioteca que simplifica la creación de clases Java.
 - Jackson: Librería para el manejo de JSON en Java.
+- Cucumber: Herramienta de automatización de pruebas que permite escribir pruebas de aceptación en lenguaje natural 
 
 ## Enlace Documentación
 
@@ -21,5 +22,4 @@ Además, he aprovechado esta oportunidad para experimentar con tecnologías nuev
 - Si despliegas localmente la aplicación, la documentación debe estar en http://localhost:8080/swagger-ui.html
 
 ![Ejemplo de la documentación](https://i.imgur.com/g8GgRa2.png)
-
 

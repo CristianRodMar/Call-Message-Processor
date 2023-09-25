@@ -52,7 +52,8 @@ public class ApiController {
     }
 
     @Operation(summary = "Retrieve a records of messages by date", 
-        description = "Get a Records object by specifying its date. The response is a JSON with two arrays with all CallMessages and TextMessages")
+        description = "Get a Records object by specifying its date. The response is a JSON with two arrays with all CallMessages and TextMessages. " 
+        + "Example dates: 20180131, 20180201, 20180202")
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation =  Records.class), mediaType = "application/json")}),
         @ApiResponse(responseCode = "404", description = "The log with the given date was not found", content = {@Content(schema = @Schema())}),
@@ -86,7 +87,7 @@ public class ApiController {
     }
     
     @Operation(summary =  "Retrieve the metrics of a specific date",
-        description = "Get the metrics by specifying its date.")
+        description = "Get the metrics by specifying its date. Example dates: 20180131, 20180201, 20180202")
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation =  Metrics.class), mediaType = "application/json")}),
         @ApiResponse(responseCode = "404", description = "The log with the given date was not found", content = {@Content(schema = @Schema())}),
@@ -122,7 +123,7 @@ public class ApiController {
     }
 
     @Operation(summary =  "Retrieve the KPIs of a specific date",
-        description = "Get the KPIS by specifying its date.")
+        description = "Get the KPIS by specifying its date Example dates: 20180131, 20180201, 20180202.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", content = {@Content(schema = @Schema(implementation =  KPIs.class), mediaType = "application/json")}),
         @ApiResponse(responseCode = "404", description = "The log with the given date was not found", content = {@Content(schema = @Schema())}),
