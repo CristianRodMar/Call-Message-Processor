@@ -18,7 +18,10 @@ Además, he aprovechado esta oportunidad para experimentar con tecnologías nuev
 
 ## Enlace Documentación
 
-- Actualmente la aplicación está desplegada(Es posible que tarde en iniciar): https://call-mesage-processor.onrender.com/swagger-ui/index.html
+Actualmente la aplicación está desplegada en dos sitios:
+
+- Despliegue en AWS: http://ec2-3-253-147-140.eu-west-1.compute.amazonaws.com
+- Despliegue en Render (Es posible que tarde en iniciar): https://call-mesage-processor.onrender.com/swagger-ui/index.html
 - Si despliegas localmente la aplicación, la documentación debe estar en http://localhost:8080/swagger-ui.html
 
 ![Ejemplo de la documentación](https://i.imgur.com/g8GgRa2.png)
