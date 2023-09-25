@@ -12,7 +12,7 @@ public class OpenApiConfig {
     public OpenAPI usersMicroservicOpenAPI() {
         return new OpenAPI()
         .info(new Info().title("Call Message Processor")
-                         .description("API to retrieve logs of messages and their metrics")
+                         .description("API to retrieve message records and their metrics")
                          .version("1.0"));
     }
 }
